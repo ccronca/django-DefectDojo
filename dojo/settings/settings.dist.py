@@ -136,28 +136,28 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
-    DD_SAML2_ENABLED=(bool, False),
+    DD_SAML2_ENABLED=(bool, True),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
-    DD_SAML2_AUTHENTICATION_BACKENDS=(str, 'djangosaml2.backends.Saml2Backend'),
+    DD_SAML2_AUTHENTICATION_BACKENDS=(str, 'rh.authentication.ModifiedSaml2Backend'),
     # Force Authentication to make SSO possible with SAML2
     DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
     # Metadata is required for SAML, choose either remote url or local file path
-    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
+    DD_SAML2_METADATA_AUTO_CONF_URL=(str, 'https://dev-91926552.okta.com/app/exkdbpzw0a2BLvi125d7/sso/saml/metadata'),
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),  # ex. '/public/share/idp_metadata.xml'
     # Optional, default is SITE_URL + /saml2/metadata/
     DD_SAML2_ENTITY_ID=(str, ''),
     # Allow to create user that are not already in the Django database
-    DD_SAML2_CREATE_USER=(bool, False),
+    DD_SAML2_CREATE_USER=(bool, True),
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
         # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
         # format: SAML attrib:django_user_model
-        'Email': 'email',
-        'UserName': 'username',
-        'Firstname': 'first_name',
-        'Lastname': 'last_name'
+        'username': 'username',
+        'email': 'email',
+        'first_name':'first_name',
+        'last_name':'last_name',
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
     # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
@@ -842,7 +842,8 @@ INSTALLED_APPS = (
     'drf_yasg',
     'drf_spectacular',
     'tagulous',
-    'fontawesomefree'
+    'fontawesomefree',
+    'rh'
 )
 
 # ------------------------------------------------------------------------------
@@ -977,10 +978,10 @@ if SAML2_ENABLED:
                 },
 
                 # attributes that this project need to identify a user
-                'required_attributes': ['Email', 'UserName'],
+                'required_attributes': ['username', 'email'],
 
                 # attributes that may be useful to have but not required
-                'optional_attributes': ['Firstname', 'Lastname'],
+                'optional_attributes': ['first_name', 'last_name'],
 
                 # in this section the list of IdPs we talk to are defined
                 # This is not mandatory! All the IdP available in the metadata will be considered.
@@ -1007,7 +1008,7 @@ if SAML2_ENABLED:
         'metadata': SAML_METADATA,
 
         # set to 1 to output debugging information
-        'debug': 0,
+        'debug': 1,
 
         # Signing
         # 'key_file': path.join(BASEDIR, 'private.key'),  # private part
